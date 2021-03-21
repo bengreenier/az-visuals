@@ -1,4 +1,4 @@
-# az-visuals
+# az-visuals [![CI](https://github.com/bengreenier/az-visuals/actions/workflows/ci.yml/badge.svg)](https://github.com/bengreenier/az-visuals/actions/workflows/ci.yml)
 
 A collection of web-based tools for visualizing Azure resources. ☁🔎🎁
 
