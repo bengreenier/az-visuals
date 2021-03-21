@@ -1,0 +1,10 @@
+{
+  "name": "root",
+  "private": true,
+  "scripts": {
+    "start-tm-dev": "npx lerna run --scope tm.az-visuals.com start"
+  },
+  "devDependencies": {
+    "lerna": "^4.0.0"
+  }
+}

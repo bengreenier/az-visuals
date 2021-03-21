@@ -1,0 +1,32 @@
+{
+  "name": "@az-visuals/hierarchy",
+  "private": "false",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "1.0.0",
+  "description": "Hierarchy utilities.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p .",
+    "test": "jest -c jest.unit-conf.json",
+    "prepublishOnly": "npm run build && npm run test"
+  },
+  "author": "Ben Greenier",
+  "license": "MIT",
+  "engines": {
+    "node": "15.x"
+  },
+  "devDependencies": {
+    "@azure/arm-trafficmanager": "^5.0.0",
+    "@types/debug": "^4.1.5",
+    "jest": "^26.6.3",
+    "prettier": "2.2.1",
+    "ts-jest": "^26.4.4",
+    "typescript": "^4.1.3"
+  },
+  "dependencies": {
+    "debug": "^2.6.9",
+    "dependency-graph": "^0.10.0"
+  }
+}

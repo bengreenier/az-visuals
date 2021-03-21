@@ -1,0 +1,8 @@
+{
+  "testMatch": ["**/__tests__/**/*.test.ts"],
+  "testTimeout": 30000,
+  "testPathIgnorePatterns": ["/node_modules/", "/out/"],
+  "transform": {
+    "^.+\\.(ts|tsx)$": "ts-jest"
+  }
+}
