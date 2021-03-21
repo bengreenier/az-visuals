@@ -26,7 +26,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
     - run: npx lerna bootstrap
-    - run: npx lerna run --scope tm.az-visuals.com build
+    - run: npm run build
     - name: gh-pages
       if: success()
       uses: crazy-max/ghaction-github-pages@v2.3.0
