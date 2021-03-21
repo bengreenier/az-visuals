@@ -2,6 +2,7 @@
   "name": "root",
   "private": true,
   "scripts": {
+    "test": "npx lerna run --stream test -- --if-present",
     "start-tm-dev": "npx lerna run --scope tm.az-visuals.com start"
   },
   "devDependencies": {

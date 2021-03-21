@@ -20,6 +20,7 @@
   "devDependencies": {
     "@azure/arm-trafficmanager": "^5.0.0",
     "@types/debug": "^4.1.5",
+    "@types/jest": "^26.0.21",
     "jest": "^26.6.3",
     "prettier": "2.2.1",
     "ts-jest": "^26.4.4",
