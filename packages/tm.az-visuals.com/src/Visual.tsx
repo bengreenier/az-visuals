@@ -165,7 +165,7 @@ const loadAll = async (creds: ServiceClientCredentials) => {
     clients.map((c) => c.profiles.listBySubscription())
   );
 
-  const profiles = profileLists.flat();
+  const profiles = profileLists.flat().map((p) => ({ ...p, defaultTenant }));
 
   const walker = new graph.Walker(walkerOpts);
   const tree = walker.walkAndBuild(profiles);

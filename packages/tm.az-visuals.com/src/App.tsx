@@ -1,6 +1,5 @@
 import React from "react";
 import { AuthWrapper } from "./Auth";
-import logo from "./logo.svg";
 import "./App.css";
 import { Visual } from "./Visual";
 
