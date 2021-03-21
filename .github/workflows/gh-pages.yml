@@ -33,3 +33,5 @@ jobs:
       with:
         build_dir: packages/tm.az-visuals.com/build
         commit_message: "Release for ${{  github.sha }}"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
