@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "test": "npx lerna run --stream test -- --if-present",
-    "start-tm-dev": "npx lerna run --scope tm.az-visuals.com start"
+    "start-tm-dev": "npx lerna run --scope tm.az-visuals.com start",
+    "build": "npx lerna run --stream build"
   },
   "devDependencies": {
     "lerna": "^4.0.0"

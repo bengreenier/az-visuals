@@ -1,0 +1,35 @@
+# This workflow will do a clean install of node dependencies, build the source code, build the react app, and deploy to gh-pages.
+
+name: CD
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [15.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm ci
+    - run: npx lerna bootstrap
+    - run: npm run build
+    - name: gh-pages
+      if: success()
+      uses: crazy-max/ghaction-github-pages@v2.3.0
+      with:
+        build_dir: packages/tm.az-visuals.com/build
+        commit_message: "Release for ${{  github.sha }}"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
