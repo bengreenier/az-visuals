@@ -29,6 +29,7 @@ jobs:
       if: success()
       uses: crazy-max/ghaction-github-pages@v2.3.0
       with:
+        fqdn: tm.az-visuals.com
         build_dir: packages/tm.az-visuals.com/build
         commit_message: "Release for ${{  github.sha }}"
       env:
