@@ -5,6 +5,8 @@ name: CD
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
@@ -24,6 +26,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
     - run: npx lerna bootstrap
+    - run: echo "${{ secrets.BUILD_CONFIG }}" > packages/tm.az-visuals.com/src/build-config.json
     - run: npm run build
     - name: gh-pages
       if: success()
