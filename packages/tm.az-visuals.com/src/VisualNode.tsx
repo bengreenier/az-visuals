@@ -18,7 +18,11 @@ const VisualNode: React.FunctionComponent<CustomNodeElementProps> = ({
   nodeDatum,
   toggleNode,
 }) => {
-  const { activeAndEnabled } = nodeDatum.attributes as DataAttributes;
+  const {
+    activeAndEnabled,
+    portalUrl,
+    ...attrs
+  } = nodeDatum.attributes as DataAttributes;
   return (
     <>
       <circle
@@ -31,18 +35,22 @@ const VisualNode: React.FunctionComponent<CustomNodeElementProps> = ({
         }}
       ></circle>
       <g className="rd3t-label">
-        <text className="rd3t-label__title" {...textLayout.title}>
+        <text
+          className="rd3t-label__title"
+          {...textLayout.title}
+          onClick={() => {
+            window.open(portalUrl, "_blank");
+          }}
+        >
           {nodeDatum.name}
         </text>
         <text className="rd3t-label__attributes">
-          {nodeDatum.attributes &&
-            Object.entries(nodeDatum.attributes).map(
-              ([labelKey, labelValue], i) => (
-                <tspan key={`${labelKey}-${i}`} {...textLayout.attribute}>
-                  {labelKey}: {labelValue}
-                </tspan>
-              )
-            )}
+          {attrs &&
+            Object.entries(attrs).map(([labelKey, labelValue], i) => (
+              <tspan key={`${labelKey}-${i}`} {...textLayout.attribute}>
+                {labelKey}: {labelValue}
+              </tspan>
+            ))}
         </text>
       </g>
     </>
