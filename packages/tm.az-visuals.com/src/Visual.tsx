@@ -8,7 +8,8 @@ import { Endpoint, Profile } from "@azure/arm-trafficmanager/esm/models";
 import Tree from "react-d3-tree";
 import { RawNodeDatum } from "react-d3-tree/lib/types/common";
 import { renderVisualNode } from "./VisualNode";
-import { toTree } from "./VisualUtils";
+import { determinePathClass, toTree } from "./VisualUtils";
+import "./Visual.css";
 
 /**
  * Helper to determine if object is null or undefined
@@ -94,7 +95,7 @@ const walkerOpts: graph.WalkerOpts<Profile & Endpoint> = {
      * Utility method used to remove certain fields from the data
      * @returns fields to strip
      */
-    strip: () => ["endpoints", "tags"],
+    strip: () => ["tags"],
   },
 };
 
@@ -174,8 +175,10 @@ export const Visual = () => {
       {tree ? (
         <Tree
           data={tree}
+          orientation={"vertical"}
           depthFactor={500}
           nodeSize={{ x: 400, y: 400 }}
+          pathClassFunc={determinePathClass}
           renderCustomNodeElement={renderVisualNode}
         />
       ) : (
