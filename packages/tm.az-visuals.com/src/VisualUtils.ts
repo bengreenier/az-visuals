@@ -1,6 +1,10 @@
 import { Endpoint, Profile } from "@azure/arm-trafficmanager/esm/models";
 import { DepGraph } from "dependency-graph";
-import { RawNodeDatum } from "react-d3-tree/lib/types/common";
+import {
+  Orientation,
+  RawNodeDatum,
+  TreeLinkDatum,
+} from "react-d3-tree/lib/types/common";
 
 /**
  * Serializes a dependency graph to a react-d3-tree dataset
@@ -40,6 +44,11 @@ const toSubTree = (
   });
 };
 
+export enum BooleanAttribute {
+  True = "true",
+  False = "false",
+}
+
 export enum EnabledAttribute {
   Unknown = "",
   Enabled = "Enabled",
@@ -51,7 +60,37 @@ export interface DataAttributes extends Record<string, string> {
   routingMethod: string;
   monitorStatus: string;
   enabled: EnabledAttribute;
+  activeAndEnabled: BooleanAttribute;
 }
+
+const isHealthyEndpoint = (data: Endpoint): boolean => {
+  return (
+    data.endpointStatus === EnabledAttribute.Enabled &&
+    data.endpointMonitorStatus !== "Degraded" &&
+    data.endpointMonitorStatus !== "Disabled" &&
+    data.endpointMonitorStatus !== "Inactive" &&
+    data.endpointMonitorStatus !== "Stopped"
+  );
+};
+
+/**
+ * Determines if a profile/endpoint is active and enabled
+ * @param data data to inspect
+ */
+const isActiveAndEnabled = (data: Endpoint & Profile): BooleanAttribute => {
+  if (data.type === "Microsoft.Network/trafficManagerProfiles") {
+    const hasHealthyEndpoint =
+      data.endpoints?.some((e) => isHealthyEndpoint(e)) ?? false;
+    return data.profileStatus === EnabledAttribute.Enabled && hasHealthyEndpoint
+      ? BooleanAttribute.True
+      : BooleanAttribute.False;
+  } else {
+    return data.endpointStatus === EnabledAttribute.Enabled &&
+      isHealthyEndpoint(data)
+      ? BooleanAttribute.True
+      : BooleanAttribute.False;
+  }
+};
 
 /**
  * Parse endpoint/profile data into pre-defined attributes object
@@ -70,5 +109,24 @@ export const selectAttributes = (data: Endpoint & Profile): DataAttributes => {
     enabled: (data.profileStatus ||
       data.endpointStatus ||
       "") as EnabledAttribute,
+    activeAndEnabled: isActiveAndEnabled(data),
   };
+};
+
+/**
+ * Determine the class to use for the link
+ * @param link the link
+ * @param orientation the link orientation
+ */
+export const determinePathClass = (
+  link: TreeLinkDatum,
+  orientation: Orientation
+) => {
+  const { source, target } = link;
+  const targetAttrs = target.data.attributes as DataAttributes;
+  console.log(target);
+
+  return targetAttrs.activeAndEnabled === BooleanAttribute.True
+    ? "active-link"
+    : "inactive-link";
 };

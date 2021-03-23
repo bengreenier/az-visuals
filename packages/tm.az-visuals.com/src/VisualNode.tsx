@@ -1,6 +1,6 @@
 import { CustomNodeElementProps } from "react-d3-tree/lib/types/common";
 
-import { DataAttributes, EnabledAttribute } from "./VisualUtils";
+import { BooleanAttribute, DataAttributes } from "./VisualUtils";
 
 const DEFAULT_NODE_CIRCLE_RADIUS = 15;
 const textLayout = {
@@ -18,11 +18,13 @@ const VisualNode: React.FunctionComponent<CustomNodeElementProps> = ({
   nodeDatum,
   toggleNode,
 }) => {
-  const { enabled } = nodeDatum.attributes as DataAttributes;
+  const { activeAndEnabled } = nodeDatum.attributes as DataAttributes;
   return (
     <>
       <circle
-        fill={enabled === EnabledAttribute.Enabled ? "green" : "red"}
+        fill={
+          activeAndEnabled === BooleanAttribute.True ? "#2C7BB6" : "#D7191C"
+        }
         r={DEFAULT_NODE_CIRCLE_RADIUS}
         onClick={() => {
           toggleNode();
