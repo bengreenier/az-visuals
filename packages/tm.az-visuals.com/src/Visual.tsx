@@ -19,6 +19,21 @@ const isNullOrUndefined = (data: unknown) =>
   typeof data === "undefined" || data === null;
 
 /**
+ * Helper to extract azure resource group and name
+ * @param resourceId the azure resource id
+ */
+const extractIdName = (resourceId: string) => {
+  const matched = /\/resourceGroups\/(.+?)\/providers\/Microsoft.Network\/trafficManagerProfiles\/(.+)\/?/.exec(
+    resourceId
+  );
+  if (matched == null || matched.length < 2) {
+    throw new Error(`Invalid resourceId: '${resourceId}'`);
+  }
+
+  return { resourceGroup: matched[1], name: matched[2] };
+};
+
+/**
  * Options for the graph walker to traverse TM data
  */
 const walkerOpts: graph.WalkerOpts<Profile & Endpoint> = {
@@ -86,9 +101,14 @@ const walkerOpts: graph.WalkerOpts<Profile & Endpoint> = {
 /**
  * Load all traffic managers the user is authorized to access, and serialize them to a tree
  * @param creds Azure credentials object
+ * @param useDetailedApi Flag to use the slower but more detailed api to query properties for every TM individually.
+ * Workaround for including properties.monitorConfig.profileMonitorStatus
  * @returns react-d3-tree compatible dataset
  */
-const loadAll = async (creds: ServiceClientCredentials) => {
+const loadAll = async (
+  creds: ServiceClientCredentials,
+  useDetailedApi = true
+) => {
   const subClient = new SubscriptionClient(creds);
 
   // TODO(bengreenier): We should be able to correlate subs and tenants, but we apparently cannot
@@ -105,9 +125,21 @@ const loadAll = async (creds: ServiceClientCredentials) => {
   );
 
   const profileLists = await Promise.all(
-    // TODO(bengreenier): This API apparently excludes properties.monitorConfig.profileMonitorStatus which is real annoying
-    // To workaround this and get that data, we should look at batch API, or fall back to individual profile GETs
-    clients.map((c) => c.profiles.listBySubscription())
+    clients.map((c) =>
+      c.profiles.listBySubscription().then(async (list) => {
+        // detailed API works around missing fields, but is WAY heavier
+        if (useDetailedApi) {
+          const innerProfileLists = list.map((profile) => {
+            const { resourceGroup, name } = extractIdName(profile.id as string);
+            return c.profiles.get(resourceGroup, name);
+          });
+
+          return await Promise.all(innerProfileLists);
+        } else {
+          return list;
+        }
+      })
+    )
   );
 
   const profiles = profileLists.flat().map((p) => ({ ...p, defaultTenant }));
