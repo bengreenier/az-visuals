@@ -116,13 +116,10 @@ export const selectAttributes = (data: Endpoint & Profile): DataAttributes => {
 /**
  * Determine the class to use for the link
  * @param link the link
- * @param orientation the link orientation
+ * @param _ the link orientation
  */
-export const determinePathClass = (
-  link: TreeLinkDatum,
-  orientation: Orientation
-) => {
-  const { source, target } = link;
+export const determinePathClass = (link: TreeLinkDatum, _: Orientation) => {
+  const { target } = link;
   const targetAttrs = target.data.attributes as DataAttributes;
   console.log(target);
 
