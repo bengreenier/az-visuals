@@ -1,3 +1,15 @@
+.rd3t-label__title {
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.rd3t-label__attributes {
+	cursor: move;
+    cursor: grab;
+    cursor: -moz-grab;
+    cursor: -webkit-grab;
+}
+
 .active-link {
 	stroke:#2C7BB6 !important;
 }

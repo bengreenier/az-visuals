@@ -4,11 +4,11 @@ import { AuthWrapperContext } from "./Auth";
 import { SubscriptionClient } from "@azure/arm-subscriptions";
 import { TrafficManagerManagementClient } from "@azure/arm-trafficmanager";
 import { graph } from "@az-visuals/hierarchy";
-import { Endpoint, Profile } from "@azure/arm-trafficmanager/esm/models";
+import { Endpoint } from "@azure/arm-trafficmanager/esm/models";
 import Tree from "react-d3-tree";
 import { RawNodeDatum } from "react-d3-tree/lib/types/common";
 import { renderVisualNode } from "./VisualNode";
-import { determinePathClass, toTree } from "./VisualUtils";
+import { determinePathClass, GraphData, toTree } from "./VisualUtils";
 import "./Visual.css";
 
 /**
@@ -37,7 +37,7 @@ const extractIdName = (resourceId: string) => {
 /**
  * Options for the graph walker to traverse TM data
  */
-const walkerOpts: graph.WalkerOpts<Profile & Endpoint> = {
+const walkerOpts: graph.WalkerOpts<GraphData> = {
   /**
    * Informs the graph walker if data should be ignored
    * @param data profile/endpoint data
@@ -143,7 +143,9 @@ const loadAll = async (
     )
   );
 
-  const profiles = profileLists.flat().map((p) => ({ ...p, defaultTenant }));
+  const profiles = profileLists
+    .flat()
+    .map((p) => ({ ...p, tenantId: defaultTenant }));
 
   const walker = new graph.Walker(walkerOpts);
   const tree = walker.walkAndBuild(profiles);
