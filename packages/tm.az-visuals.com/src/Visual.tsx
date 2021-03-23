@@ -5,9 +5,10 @@ import { SubscriptionClient } from "@azure/arm-subscriptions";
 import { TrafficManagerManagementClient } from "@azure/arm-trafficmanager";
 import { graph } from "@az-visuals/hierarchy";
 import { Endpoint, Profile } from "@azure/arm-trafficmanager/esm/models";
-import { DepGraph } from "dependency-graph";
 import Tree from "react-d3-tree";
 import { RawNodeDatum } from "react-d3-tree/lib/types/common";
+import { renderVisualNode } from "./VisualNode";
+import { toTree } from "./VisualUtils";
 
 /**
  * Helper to determine if object is null or undefined
@@ -83,62 +84,6 @@ const walkerOpts: graph.WalkerOpts<Profile & Endpoint> = {
 };
 
 /**
- * Serializes a dependency graph to a react-d3-tree dataset
- * @param graph dependency graph to serialize
- * @returns react-d3-tree compatible tree data
- */
-const toTree = (graph: DepGraph<Endpoint & Profile>): RawNodeDatum => {
-  // TODO(bengreenier): support multiple "roots"
-  // by handling all top level nodes returned by this call, rather than just [0]
-  const topLevel = graph.overallOrder(true)[0];
-  const raw = graph.getNodeData(topLevel);
-  return {
-    name: raw.name as string,
-    attributes: selectAttributes(raw),
-    children: toSubTree(graph, topLevel),
-  };
-};
-
-/**
- * Serializes a dependency sub graph to a react-d3-tree sub dataset
- * Should not be called directly, used by @see toTree
- * @param graph dependency sub graph to serialize
- * @param root sub graph root name
- * @returns react-d3-tree compatible subtree data
- */
-const toSubTree = (
-  graph: DepGraph<Endpoint & Profile>,
-  root: string
-): RawNodeDatum[] => {
-  return graph.directDependantsOf(root).map((next) => {
-    const raw = graph.getNodeData(next);
-    return {
-      name: raw.name as string,
-      attributes: selectAttributes(raw),
-      children: toSubTree(graph, next),
-    };
-  });
-};
-
-/**
- * Parse endpoint/profile data into pre-defined attributes object
- * @param data endpoint/profile data
- * @returns attribute records
- */
-const selectAttributes = (data: Endpoint & Profile): Record<string, string> => {
-  // select just the things we care about rendering
-  return {
-    type: data.type || "",
-    routingMethod: data.trafficRoutingMethod || "",
-    monitorStatus:
-      data.monitorConfig?.profileMonitorStatus ||
-      data.endpointMonitorStatus ||
-      "",
-    enabled: data.profileStatus || data.endpointStatus || "",
-  };
-};
-
-/**
  * Load all traffic managers the user is authorized to access, and serialize them to a tree
  * @param creds Azure credentials object
  * @returns react-d3-tree compatible dataset
@@ -195,7 +140,12 @@ export const Visual = () => {
   return (
     <div style={{ width: `100vw`, height: `100vh` }}>
       {tree ? (
-        <Tree data={tree} depthFactor={500} nodeSize={{ x: 400, y: 400 }} />
+        <Tree
+          data={tree}
+          depthFactor={500}
+          nodeSize={{ x: 400, y: 400 }}
+          renderCustomNodeElement={renderVisualNode}
+        />
       ) : (
         <h1>Loading...</h1>
       )}
