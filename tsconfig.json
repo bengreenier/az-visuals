@@ -8,6 +8,9 @@
 	  "skipLibCheck": true,
 	  "declaration": true,
 	  "baseUrl": "./packages",
+	  "lib": [
+		  "esnext"
+	  ]
 	},
 	"exclude": ["node_modules", "dist"]
   }
