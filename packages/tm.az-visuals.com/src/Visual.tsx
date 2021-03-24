@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { ChangeEvent, useContext, useEffect, useState } from "react";
 import { ServiceClientCredentials } from "@azure/ms-rest-js";
 import { AuthWrapperContext } from "./Auth";
 import { SubscriptionClient } from "@azure/arm-subscriptions";
@@ -10,6 +10,7 @@ import { RawNodeDatum } from "react-d3-tree/lib/types/common";
 import { renderVisualNode } from "./VisualNode";
 import { determinePathClass, GraphData, toTree } from "./VisualUtils";
 import "./Visual.css";
+import { DepGraph } from "dependency-graph";
 
 /**
  * Helper to determine if object is null or undefined
@@ -18,6 +19,22 @@ import "./Visual.css";
  */
 const isNullOrUndefined = (data: unknown) =>
   typeof data === "undefined" || data === null;
+
+/**
+ * Interface to define a select dropdown option.
+ */
+interface selectOption {
+  label: string;
+  value: string;
+}
+
+/** 
+ * Defines an empty tree for no data case.
+ */
+const emptyTree: RawNodeDatum = {
+  name: "",
+  attributes: {},
+};
 
 /**
  * Helper to extract azure resource group and name
@@ -33,6 +50,14 @@ const extractIdName = (resourceId: string) => {
 
   return { resourceGroup: matched[1], name: matched[2] };
 };
+
+/**
+ * Interface to define a select dropdown option.
+ */
+interface selectOption {
+  label: string;
+  value: string;
+}
 
 /**
  * Options for the graph walker to traverse TM data
@@ -148,9 +173,7 @@ const loadAll = async (
     .map((p) => ({ ...p, tenantId: defaultTenant }));
 
   const walker = new graph.Walker(walkerOpts);
-  const tree = walker.walkAndBuild(profiles);
-
-  return toTree(tree);
+  return walker.walkAndBuild(profiles);
 };
 
 /**
@@ -162,18 +185,50 @@ export const Visual = () => {
   const ctx = useContext(AuthWrapperContext);
   const { credentials } = ctx;
 
+  const [fullGraph, setFullGraph] = useState<DepGraph<GraphData>>();
   const [tree, setTree] = useState<RawNodeDatum>();
+
+  const [selectOptions, setSelectOptions] = useState<selectOption[]>([]);
+  const [selectValue, setSelectValue] = useState<string>();
 
   // load the tms, and get the resulting tree structure
   useEffect(() => {
-    loadAll(credentials).then((visualTree) => {
-      setTree(visualTree);
+    loadAll(credentials).then((fullGraph) => {
+      setFullGraph(fullGraph);
     });
   }, [credentials]);
+
+  useEffect(() => {
+    if (fullGraph) {
+      const treeRoots = fullGraph.overallOrder(true);
+      setSelectOptions(treeRoots.map((t) => ({ label: t, value: t })));
+
+      if (treeRoots.length == 0) {
+        setTree(emptyTree);
+      } else {
+        setSelectValue(treeRoots[0]);
+        setTree(toTree(fullGraph, treeRoots[0]));
+      }
+    }
+  }, [fullGraph]);
+
+  const onSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setSelectValue(e.currentTarget.value);
+    if (fullGraph) {
+      setTree(toTree(fullGraph, e.currentTarget.value));
+    }
+  };
 
   // create the tree visual
   return (
     <div style={{ width: `100vw`, height: `100vh` }}>
+      <select value={selectValue} onChange={onSelectChange}>
+        {selectOptions.map(({ label, value }) => (
+          <option key={value} value={value}>
+            {label}
+          </option>
+        ))}
+      </select>
       {tree ? (
         <Tree
           data={tree}
