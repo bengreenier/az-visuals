@@ -195,7 +195,7 @@ export const Visual = () => {
       const treeRoots = fullGraph.overallOrder(true);
       setSelectOptions(treeRoots.map((t) => ({ label: t, value: t })));
 
-      if (treeRoots.length == 0) {
+      if (treeRoots.length === 0) {
         setTree(emptyTree);
       } else {
         setSelectValue(treeRoots[0]);
