@@ -8,9 +8,9 @@ import { Endpoint } from "@azure/arm-trafficmanager/esm/models";
 import Tree from "react-d3-tree";
 import { RawNodeDatum } from "react-d3-tree/lib/types/common";
 import { renderVisualNode } from "./VisualNode";
+import { DepGraph } from "dependency-graph";
 import { determinePathClass, GraphData, toTree } from "./VisualUtils";
 import "./Visual.css";
-import { DepGraph } from "dependency-graph";
 
 /**
  * Helper to determine if object is null or undefined
@@ -28,7 +28,7 @@ interface selectOption {
   value: string;
 }
 
-/** 
+/**
  * Defines an empty tree for no data case.
  */
 const emptyTree: RawNodeDatum = {
@@ -50,14 +50,6 @@ const extractIdName = (resourceId: string) => {
 
   return { resourceGroup: matched[1], name: matched[2] };
 };
-
-/**
- * Interface to define a select dropdown option.
- */
-interface selectOption {
-  label: string;
-  value: string;
-}
 
 /**
  * Options for the graph walker to traverse TM data
