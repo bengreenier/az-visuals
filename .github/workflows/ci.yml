@@ -28,3 +28,4 @@ jobs:
     - run: npm ci
     - run: npx lerna bootstrap
     - run: npm test
+    - run: npm run build
