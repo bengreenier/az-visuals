@@ -1,4 +1,5 @@
 {
   "clientId": "56b74d6c-2ee9-4384-adae-06c968b6ee1b",
-  "redirectUri": "http://localhost:3000"
+  "redirectUri": "http://localhost:3000",
+  "tenantId": ""
 }

@@ -14,12 +14,10 @@ export type GraphData = Endpoint & Profile & { tenantId: string };
 /**
  * Serializes a dependency graph to a react-d3-tree dataset
  * @param graph dependency graph to serialize
+ * @param topLevel name of root node to show
  * @returns react-d3-tree compatible tree data
  */
-export const toTree = (graph: DepGraph<GraphData>): RawNodeDatum => {
-  // TODO(bengreenier): support multiple "roots"
-  // by handling all top level nodes returned by this call, rather than just [0]
-  const topLevel = graph.overallOrder(true)[0];
+export const toTree = (graph: DepGraph<GraphData>, topLevel: string): RawNodeDatum => {
   const raw = graph.getNodeData(topLevel);
   return {
     name: raw.name as string,
