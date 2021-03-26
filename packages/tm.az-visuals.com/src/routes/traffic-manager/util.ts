@@ -397,7 +397,7 @@ export const selectAttributes = (
   portalHostname: string
 ): DataAttributes => {
   // select just the things we care about rendering
-  return {
+  const res: DataAttributes = {
     type: data.type || "",
     routingMethod: data.trafficRoutingMethod || "",
     monitorStatus:
@@ -410,6 +410,19 @@ export const selectAttributes = (
     activeAndEnabled: isActiveAndEnabled(data),
     portalUrl: buildPortalUrl(portalHostname, data.tenantId, data.id as string),
   };
+
+  // augment with data for different routing types
+  if (typeof data.weight !== "undefined") {
+    res["weight"] = `${data.weight}`;
+  }
+  if (typeof data.geoMapping !== "undefined") {
+    res["geographies"] = data?.geoMapping?.join(", ") ?? "world";
+  }
+  if (typeof data.priority !== "undefined") {
+    res["priority"] = `${data.priority}`;
+  }
+
+  return res;
 };
 
 /**
