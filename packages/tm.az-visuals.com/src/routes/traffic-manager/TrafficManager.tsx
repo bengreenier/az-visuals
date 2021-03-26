@@ -28,6 +28,7 @@ import {
 } from "react-d3-tree/lib/types/common";
 import Tree from "react-d3-tree";
 import "./TrafficManager.css";
+import { ApiType, RuntimeManifest } from "../../types";
 
 /**
  * Route parameter name for subscription property
@@ -38,21 +39,6 @@ export const subscriptionParam = "subscription";
  * Route parameter name for  traffic manager property
  */
 export const trafficManagerParam = "trafficManager";
-
-/**
- * Types of APIs we support
- */
-export enum ApiType {
-  /**
-   * This will directly query azure
-   */
-  Azure = "azure",
-
-  /**
-   * This will query a custom endpoint
-   */
-  Custom = "custom",
-}
 
 /**
  * Properties for the traffic manager data component
@@ -67,6 +53,11 @@ interface TrafficManagerDataProps {
    * Optional url, used when type == ApiType.Custom @see ApiType
    */
   url?: string;
+
+  /**
+   * portal hostname format to use
+   */
+  portalHostname: RuntimeManifest["portalHostname"];
 
   /**
    * A subscription filter value to limit subscriptions
@@ -88,6 +79,11 @@ export interface TrafficManagerPageProps {
    */
   api: Pick<TrafficManagerDataProps, "type"> &
     Pick<TrafficManagerDataProps, "url">;
+
+  /**
+   * portal hostname format to use
+   */
+  portalHostname: RuntimeManifest["portalHostname"];
 }
 
 /**
@@ -126,6 +122,7 @@ export const TrafficManagerPage = (props: TrafficManagerPageProps) => {
         <IndexPage onReady={() => setShowIndex("false")} />
       ) : (
         <TrafficManagerData
+          portalHostname={props.portalHostname}
           subscriptionFilter={subscriptionMatcher}
           trafficManagerFilter={trafficManagerMatcher}
           {...props.api}
@@ -240,7 +237,13 @@ export const IndexPage = (
  * @returns react component
  */
 const TrafficManagerData = (props: TrafficManagerDataProps) => {
-  const { type, url, subscriptionFilter, trafficManagerFilter } = props;
+  const {
+    type,
+    url,
+    subscriptionFilter,
+    trafficManagerFilter,
+    portalHostname,
+  } = props;
   const ctx = useContext(AuthWrapperContext);
   const { credentials } = ctx;
   const query = useQuery();
@@ -306,7 +309,7 @@ const TrafficManagerData = (props: TrafficManagerDataProps) => {
     <>
       {activeRoot ? (
         <TrafficManagerView
-          tree={toTree(graph, activeRoot)}
+          tree={toTree(graph, activeRoot, portalHostname)}
           treeId={activeRoot}
           availableRoots={graphRoots}
           requestTree={(newRoot: string) => {
