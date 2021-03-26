@@ -27,9 +27,9 @@ const RouterTree = (props: { manifest: RuntimeManifest }) => {
   return (
     <AuthWrapper
       enabled={manifest.apiType === ApiType.Azure}
-      clientId={manifest.azure.clientId}
-      redirectUri={manifest.azure.redirectUri}
-      tenantId={manifest.azure.tenantId ?? "common"}
+      clientId={manifest.azure?.clientId ?? ""}
+      redirectUri={manifest.azure?.redirectUri ?? ""}
+      tenantId={manifest.azure?.tenantId ?? "common"}
     >
       <HashRouter>
         <Switch>
