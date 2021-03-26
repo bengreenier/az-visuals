@@ -244,17 +244,19 @@ export const parseMatcherParam = (param: string) => {
  * Serializes a dependency graph to a react-d3-tree dataset
  * @param graph dependency graph to serialize
  * @param topLevel name of root node to show
+ * @param portalHostname the portal hostname to use
  * @returns react-d3-tree compatible tree data
  */
 export const toTree = (
   graph: DepGraph<GraphData>,
-  topLevel: string
+  topLevel: string,
+  portalHostname: string
 ): RawNodeDatum => {
   const raw = graph.getNodeData(topLevel);
   return {
     name: raw.name as string,
-    attributes: selectAttributes(raw),
-    children: toSubTree(graph, topLevel),
+    attributes: selectAttributes(raw, portalHostname),
+    children: toSubTree(graph, topLevel, portalHostname),
   };
 };
 
@@ -263,11 +265,13 @@ export const toTree = (
  * Should not be called directly, used by @see toTree
  * @param graph dependency sub graph to serialize
  * @param root sub graph root name
+ * @param portalHostname the portal hostname to use
  * @returns react-d3-tree compatible subtree data
  */
 const toSubTree = (
   graph: DepGraph<GraphData>,
-  root: string
+  root: string,
+  portalHostname: string
 ): RawNodeDatum[] => {
   return graph.directDependantsOf(root).map((next) => {
     const raw = graph.getNodeData(next);
@@ -279,8 +283,8 @@ const toSubTree = (
 
     return {
       name: raw.name as string,
-      attributes: selectAttributes(raw),
-      children: toSubTree(graph, next),
+      attributes: selectAttributes(raw, portalHostname),
+      children: toSubTree(graph, next, portalHostname),
     };
   });
 };
@@ -317,11 +321,16 @@ export interface DataAttributes extends Record<string, string> {
 /**
  * Build a portal url
  * @see https://github.com/Azure/portaldocs/blob/45b60564f5341da629081f3ff3aa306ff909e8ab/portal-sdk/generated/portalfx-links.md#resources
+ * @param portalHostname the portal hostname to use
  * @param tenantId azure ad tenant id
  * @param resourceId azure resource id
  */
-const buildPortalUrl = (tenantId: string, resourceId: string) => {
-  return `https://portal.azure.com/#@{${tenantId}}/resource${resourceId}`;
+const buildPortalUrl = (
+  portalHostname: string,
+  tenantId: string,
+  resourceId: string
+) => {
+  return `https://${portalHostname}/#@{${tenantId}}/resource${resourceId}`;
 };
 
 /**
@@ -361,9 +370,13 @@ const isActiveAndEnabled = (data: GraphData): BooleanAttribute => {
 /**
  * Parse endpoint/profile data into pre-defined attributes object
  * @param data endpoint/profile data
+ * @param portalHostname the portal hostname to use
  * @returns attribute records
  */
-export const selectAttributes = (data: GraphData): DataAttributes => {
+export const selectAttributes = (
+  data: GraphData,
+  portalHostname: string
+): DataAttributes => {
   // select just the things we care about rendering
   return {
     type: data.type || "",
@@ -376,7 +389,7 @@ export const selectAttributes = (data: GraphData): DataAttributes => {
       data.endpointStatus ||
       "") as EnabledAttribute,
     activeAndEnabled: isActiveAndEnabled(data),
-    portalUrl: buildPortalUrl(data.tenantId, data.id as string),
+    portalUrl: buildPortalUrl(portalHostname, data.tenantId, data.id as string),
   };
 };
 

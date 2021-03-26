@@ -1,30 +1,35 @@
 import React from "react";
 import { HashRouter, Link, Route, Switch } from "react-router-dom";
 import {
-  ApiType,
   subscriptionParam,
   TrafficManagerPage,
   trafficManagerParam,
 } from "./traffic-manager/TrafficManager";
-import {
-  clientId,
-  redirectUri,
-  tenantId,
-  apiType,
-  apiUrl,
-} from "../build-config.json";
 import { AuthWrapper } from "../Auth";
+import { useRuntimeManifest } from "./router-utils";
+import { ApiType, RuntimeManifest } from "../types";
 
 const trafficManagerRoute = "traffic-managers";
 const subscriptionsRoute = "subscriptions";
 
 export default function AppRouter() {
+  const manifest = useRuntimeManifest();
+
+  return manifest ? (
+    <RouterTree manifest={manifest} />
+  ) : (
+    <h1>Loading runtime</h1>
+  );
+}
+
+const RouterTree = (props: { manifest: RuntimeManifest }) => {
+  const { manifest } = props;
   return (
     <AuthWrapper
-      enabled={apiType === ApiType.Azure}
-      clientId={clientId}
-      redirectUri={redirectUri}
-      tenantId={tenantId ?? "common"}
+      enabled={manifest.apiType === ApiType.Azure}
+      clientId={manifest.azure.clientId}
+      redirectUri={manifest.azure.redirectUri}
+      tenantId={manifest.azure.tenantId ?? "common"}
     >
       <HashRouter>
         <Switch>
@@ -53,11 +58,15 @@ export default function AppRouter() {
             path={`/${subscriptionsRoute}/:${subscriptionParam}/${trafficManagerRoute}/:${trafficManagerParam}`}
           >
             <TrafficManagerPage
-              api={{ type: apiType as ApiType, url: apiUrl }}
+              api={{
+                type: manifest.apiType as ApiType,
+                url: manifest.custom?.url ?? "",
+              }}
+              portalHostname={manifest.portalHostname}
             />
           </Route>
         </Switch>
       </HashRouter>
     </AuthWrapper>
   );
-}
+};
