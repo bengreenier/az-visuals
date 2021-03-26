@@ -27,6 +27,7 @@ import {
   RawNodeDatum,
 } from "react-d3-tree/lib/types/common";
 import Tree from "react-d3-tree";
+import "./TrafficManager.css";
 
 /**
  * Route parameter name for subscription property
