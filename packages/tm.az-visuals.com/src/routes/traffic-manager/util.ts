@@ -217,10 +217,29 @@ export const loadGraph = async (
 /**
  * Load graph using external apis
  * @param url url to query
+ * @param subscriptionFilter subscription filter
+ * @param trafficManagerFilter traffic manager filter
  * @returns graph
  */
-export const loadGraphExternal = async (url: string) => {
-  const res = await fetch(url);
+export const loadGraphExternal = async (
+  url: string,
+  subscriptionFilter: RegExp,
+  trafficManagerFilter: RegExp
+) => {
+  const parsedUrl = new URL(url);
+  const filterSearch = `subscriptionFilter=${encodeURIComponent(
+    subscriptionFilter.source
+  )}&trafficManagerFilter=${encodeURIComponent(trafficManagerFilter.source)}`;
+
+  let reqUrl = `${parsedUrl.origin}${parsedUrl.pathname}`;
+
+  if (parsedUrl.search && parsedUrl.search.length > 0) {
+    reqUrl += `${parsedUrl.search}&${filterSearch}`;
+  } else {
+    reqUrl += `?${filterSearch}`;
+  }
+
+  const res = await fetch(reqUrl);
   const data = (await res.json()) as GraphData;
 
   const instance = new graph.Walker(walkerOpts);

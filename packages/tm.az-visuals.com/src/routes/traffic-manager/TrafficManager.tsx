@@ -271,9 +271,11 @@ const TrafficManagerData = (props: TrafficManagerDataProps) => {
         }
       );
     } else if (type === ApiType.Custom) {
-      loadGraphExternal(url).then((data) => {
-        setGraph(data);
-      });
+      loadGraphExternal(url, subscriptionFilter, trafficManagerFilter).then(
+        (data) => {
+          setGraph(data);
+        }
+      );
     }
   }, [type, url, credentials, subscriptionFilter, trafficManagerFilter]);
 

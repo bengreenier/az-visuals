@@ -94,15 +94,19 @@ export const AuthWrapper = (props: PropsWithChildren<Props>) => {
   const [credentials, setCredentials] = useState<ServiceClientCredentials>();
 
   // create the add auth manager
-  const authManager = useMemo(
-    () =>
-      new AuthManager({
-        clientId,
-        tenant: tenantId,
-        redirectUri,
-      }),
-    [clientId, tenantId, redirectUri]
-  );
+  const authManager = useMemo(() => {
+    return enabled
+      ? new AuthManager({
+          clientId,
+          tenant: tenantId,
+          redirectUri,
+        })
+      : {
+          finalizeLogin: () => Promise.reject(new Error(`Not implemented`)),
+          login: () => {},
+          logout: () => {},
+        };
+  }, [enabled, clientId, tenantId, redirectUri]);
 
   const logout = useMemo(() => {
     return () => {
