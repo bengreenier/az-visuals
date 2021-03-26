@@ -42,6 +42,11 @@ export const AuthWrapperContext = createContext<ContextType>({
  */
 interface Props {
   /**
+   * Flag indicating if auth is enabled
+   */
+  enabled: boolean;
+
+  /**
    * The AAD client id to authenticate with
    */
   clientId: string;
@@ -81,9 +86,11 @@ interface InboundQuerystring {
  * @returns React component
  */
 export const AuthWrapper = (props: PropsWithChildren<Props>) => {
-  const { clientId, tenantId, redirectUri, logRedirectInfo } = props;
+  const { enabled, clientId, tenantId, redirectUri, logRedirectInfo } = props;
 
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
+    enabled ? false : true
+  );
   const [credentials, setCredentials] = useState<ServiceClientCredentials>();
 
   // create the add auth manager
@@ -104,6 +111,10 @@ export const AuthWrapper = (props: PropsWithChildren<Props>) => {
   }, [authManager]);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     // parse out the querystring, checking for a token
     const qs: InboundQuerystring = parseQuery(
       document.location.href.split("?")[1] || ""
@@ -135,12 +146,12 @@ export const AuthWrapper = (props: PropsWithChildren<Props>) => {
       setCredentials(new TokenCredentials(qs.token));
       setIsAuthenticated(true);
     }
-  }, [authManager, logRedirectInfo]);
+  }, [enabled, authManager, logRedirectInfo]);
 
   // render the component, including it's children within the wrapper context
   return (
     <>
-      {isAuthenticated && credentials ? (
+      {isAuthenticated ? (
         <AuthWrapperContext.Provider value={{ credentials, logout }}>
           {props.children}
         </AuthWrapperContext.Provider>

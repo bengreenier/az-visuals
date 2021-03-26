@@ -21,6 +21,7 @@ const subscriptionsRoute = "subscriptions";
 export default function AppRouter() {
   return (
     <AuthWrapper
+      enabled={apiType === ApiType.Azure}
       clientId={clientId}
       redirectUri={redirectUri}
       tenantId={tenantId ?? "common"}
